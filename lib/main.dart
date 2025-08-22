@@ -4,7 +4,8 @@ import 'package:get/get.dart';
 import 'package:luve_wish/SplashScreen/SplashScreen.dart';
 
 
-
+const String baseUrl = "http://145.223.19.248/v1";
+String? accessToken;
 void main() {
   runApp(const LoveWish());
 }
