@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:luve_wish/SplashScreen/OrderScreen.dart';
 
 class ProductScreen extends StatelessWidget {
@@ -14,27 +16,33 @@ class ProductScreen extends StatelessWidget {
           child: Column(
             children: [
               // Top Row: Progress + Skip
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Text(
-                    '2/3',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  Text(
-                    'Skip',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
+             Row(
+  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  children: [
+    const Text(
+      '2/3',
+      style: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+        color: Colors.black87,
+      ),
+    ),
+    InkWell(
+      onTap: () {
+        Get.offAllNamed("/login"); // 👈 Navigate to LoginScreen
+      },
+      child: const Text(
+        'Skip',
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: Colors.black,
+        ),
+      ),
+    ),
+  ],
+),
+
 
               // Main Image
               Expanded(

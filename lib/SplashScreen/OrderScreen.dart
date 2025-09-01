@@ -13,7 +13,6 @@ class OrderScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
             children: [
-              // Top Row: Progress + Skip
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: const [

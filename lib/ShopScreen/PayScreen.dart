@@ -14,7 +14,7 @@ class _PayScreenState extends State<PayScreen> {
   List<Map<String, String>> paymentOptions = [
     {
       'title': 'Card',
-      'image': 'assets/visa.png', // replace with your asset path
+      'image': 'assets/visa.png', 
       'value': '********2109'
     },
     {

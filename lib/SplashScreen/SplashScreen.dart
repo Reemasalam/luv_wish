@@ -30,7 +30,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     // Navigate after 2 seconds
     Future.delayed(const Duration(seconds: 2), () {
-      Get.off(() => const Splash2Screen()); // or use Navigator.pushReplacement
+      Get.off(() => const Splash2Screen()); 
     });
   }
 

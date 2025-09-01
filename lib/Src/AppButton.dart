@@ -10,7 +10,7 @@ class AppButton extends StatelessWidget {
     super.key,
     required this.text,
     required this.onPressed,
-    this.backgroundColor = const Color(0xffEB147D), // Default color
+    this.backgroundColor = const Color(0xffEB147D), // Def
   });
 
   @override

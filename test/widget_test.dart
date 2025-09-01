@@ -13,7 +13,7 @@ import 'package:luve_wish/main.dart';
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const Love_wish());
+  //  await tester.pumpWidget(const Love_wish());
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);

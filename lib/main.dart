@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:luve_wish/HomeScreen/HomeScreen.dart';
+import 'package:luve_wish/LoginScreen/LoginScreen.dart';
 import 'package:luve_wish/SplashScreen/SplashScreen.dart';
 
-
-const String baseUrl = "http://145.223.19.248/v1";
 String? accessToken;
+String baseUrl = "http://31.97.41.249/v1";
+
 void main() {
   runApp(const LoveWish());
 }
@@ -23,7 +25,12 @@ class LoveWish extends StatelessWidget {
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Love Wish',
+          // First go to splash → it decides login/home
           home: const SplashScreen(),
+          getPages: [
+            GetPage(name: "/login", page: () => const LoginScreen()),
+            GetPage(name: "/home", page: () => const HomeScreen()),
+          ],
         );
       },
     );

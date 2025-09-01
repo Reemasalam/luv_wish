@@ -93,7 +93,7 @@ class RegisterScreen extends StatelessWidget {
             enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
             borderSide: const BorderSide(
-              color: Color(0xFF676767), // Same grey color
+              color: Color(0xFF676767), 
               width: 1
             ),
           ),
