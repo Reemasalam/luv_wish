@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:luve_wish/LoginScreen/LoginScreen.dart';
 
 class OrderScreen extends StatelessWidget {
@@ -15,8 +17,8 @@ class OrderScreen extends StatelessWidget {
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Text(
+                children: [
+                  const Text(
                     '3/3',
                     style: TextStyle(
                       fontSize: 16,
@@ -24,14 +26,19 @@ class OrderScreen extends StatelessWidget {
                       color: Colors.black87,
                     ),
                   ),
-                  Text(
-                    'Skip',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black,
-                    ),
-                  ),
+                    InkWell(
+      onTap: () {
+        Get.offAllNamed("/login"); 
+      },
+      child: const Text(
+        'Skip',
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: Colors.black,
+        ),
+      ),
+    ),
                 ],
               ),
 

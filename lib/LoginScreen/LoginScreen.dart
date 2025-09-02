@@ -2,8 +2,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:luve_wish/HomeScreen/HomeScreen.dart';
 
-import 'package:luve_wish/HomeScreen/HomeView.dart';
+//import 'package:luve_wish/HomeScreen/HomeView.dart';
 import 'package:luve_wish/LoginScreen/ForgetScreen.dart';
 import 'package:luve_wish/LoginScreen/Service/AutheticationController.dart';
 import 'package:luve_wish/LoginScreen/SignUpScreen.dart';
@@ -28,7 +29,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (success && mounted) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomeMainScreen()),
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
     }
 
@@ -142,7 +143,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) =>
-                                        const SignUpScreen()));
+                                         SignUpScreen()));
                           },
                       ),
                     ],

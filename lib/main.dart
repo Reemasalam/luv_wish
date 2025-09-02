@@ -29,7 +29,7 @@ class LoveWish extends StatelessWidget {
           home: const SplashScreen(),
           getPages: [
             GetPage(name: "/login", page: () => const LoginScreen()),
-            GetPage(name: "/home", page: () => const HomeScreen()),
+           // GetPage(name: "/home", page: () => const HomeScreen()),
           ],
         );
       },

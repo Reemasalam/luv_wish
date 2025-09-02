@@ -5,13 +5,12 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:luve_wish/LoginScreen/ForgetScreen.dart';
 import 'package:luve_wish/LoginScreen/LoginScreen.dart';
 import 'package:luve_wish/LoginScreen/RegisterScreen.dart';
-
-void main() {
-  runApp(const MaterialApp(home: SignUpScreen()));
-}
+import 'package:luve_wish/LoginScreen/Service/AutheticationController.dart';
 
 class SignUpScreen extends StatelessWidget {
-  const SignUpScreen({super.key});
+  SignUpScreen({super.key});
+
+  final LoginController controller = LoginController();
 
   @override
   Widget build(BuildContext context) {
@@ -19,43 +18,48 @@ class SignUpScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Center(
-          child: Padding(
+          child: SingleChildScrollView(   // ✅ Added scroll to avoid overflow on small screens
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 70),
-                Text(
-                  "Create an",
-                  style: GoogleFonts.montserrat(
-                    fontSize: 36,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  "Account",
-                  style: GoogleFonts.montserrat(
-                    fontSize: 36,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                Text("Create an",
+                    style: GoogleFonts.montserrat(
+                        fontSize: 36, fontWeight: FontWeight.w600)),
+                Text("Account",
+                    style: GoogleFonts.montserrat(
+                        fontSize: 36, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 30),
+
+                // Full Name
+        
+
+                // Email
                 _buildInputField(
-                  hintText: "Username or Email",
-                  icon: Icons.person,
+                  hintText: "Usernmae or Email",
+                  icon: Icons.email,
+                  controller: controller.emailController,
                 ),
                 const SizedBox(height: 20),
+
+                // Password
                 _buildInputField(
                   hintText: "Password",
                   icon: Icons.lock,
                   isPassword: true,
+                  controller: controller.passwordController,
                 ),
                 const SizedBox(height: 20),
+
+                // Confirm Password
                 _buildInputField(
                   hintText: "Confirm Password",
                   icon: Icons.lock,
                   isPassword: true,
-                ), const SizedBox(height: 20),
+                  controller: controller.confirmPasswordController,
+                ),
+                const SizedBox(height: 20),
                   RichText(
   text: TextSpan(
     style: GoogleFonts.montserrat(
@@ -70,12 +74,7 @@ class SignUpScreen extends StatelessWidget {
         style: const TextStyle(color: Colors.red),
         recognizer: TapGestureRecognizer()
           ..onTap = () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const RegisterScreen(), // Replace with your target screen
-              ),
-            );
+          
           },
       ),
       const TextSpan(text: " button, you agree\nto the public offer"),
@@ -83,32 +82,38 @@ class SignUpScreen extends StatelessWidget {
   ),
 ),
 
- 
-              
                 const SizedBox(height: 30),
                 Center(
                   child: SizedBox(
                     width: 317,
                     height: 55,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        final success = await controller.register(context);
+                        if (success) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>   RegisterScreen()),
+                          );
+                        }
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xffEB147D),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+                            borderRadius: BorderRadius.circular(10)),
                       ),
-                      child: Text(
-                        "Create Account",
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,color: Colors.white
-                        ),
-                      ),
+                      child: Text("Create Account",
+                          style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white)),
                     ),
                   ),
                 ),
-                const SizedBox(height:40),
+
+                const SizedBox(height: 40),
+
                 Center(
                   child: Text(
                     "- OR Continue with -",
@@ -116,6 +121,7 @@ class SignUpScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: const [
@@ -135,36 +141,36 @@ class SignUpScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 30),
-             
-Center(
-  child: RichText(
-    text: TextSpan(
-      style: GoogleFonts.poppins(color: Colors.black),
-      children: [
-        const TextSpan(text: "I Already have an Account "),
-        TextSpan(
-          text: "Login",
-          style: const TextStyle(
-            color: Colors.pink,
-            fontWeight: FontWeight.w500,
-            decoration: TextDecoration.underline,
-          ),
-          recognizer: TapGestureRecognizer()
-            ..onTap = () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const LoginScreen(),
-                ),
-              );
-            },
-        ),
-      ],
-    ),
-  ),
-),
 
+                const SizedBox(height: 30),
+
+                Center(
+                  child: RichText(
+                    text: TextSpan(
+                      style: GoogleFonts.poppins(color: Colors.black),
+                      children: [
+                        const TextSpan(text: "I Already have an Account "),
+                        TextSpan(
+                          text: "Login",
+                          style: const TextStyle(
+                            color: Colors.pink,
+                            fontWeight: FontWeight.w500,
+                            decoration: TextDecoration.underline,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const LoginScreen(),
+                                ),
+                              );
+                            },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -176,9 +182,11 @@ Center(
   Widget _buildInputField({
     required String hintText,
     required IconData icon,
+    required TextEditingController controller, // ✅ added controller param
     bool isPassword = false,
   }) {
     return TextField(
+      controller: controller, // ✅ now linked to controller
       obscureText: isPassword,
       decoration: InputDecoration(
         hintText: hintText,
@@ -218,10 +226,10 @@ class _SocialLoginButton extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: Colors.pink, width: 2), // Always pink border
+          border: Border.all(color: Colors.pink, width: 2),
         ),
         child: IconButton(
-          icon: Icon(icon, color: iconColor), // Brand-colored icon
+          icon: Icon(icon, color: iconColor),
           onPressed: () {},
         ),
       ),

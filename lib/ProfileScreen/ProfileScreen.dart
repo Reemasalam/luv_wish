@@ -1,28 +1,74 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:luve_wish/ProfileScreen/Services/ProfileController.dart' show ProfileController;
+import 'package:shared_preferences/shared_preferences.dart';
 
-class ProfileScreen extends StatelessWidget {
+
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final ProfileController _controller = ProfileController();
+
+  Map<String, dynamic>? profileData;
+  bool isLoading = true;
+  String? errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("token");
+
+      if (token == null) {
+        setState(() {
+          isLoading = false;
+          errorMessage = "No token found. Please log in.";
+        });
+        return;
+      }
+
+      final data = await _controller.fetchProfile(token);
+
+      if (mounted) {
+        setState(() {
+          profileData = data;
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          errorMessage = e.toString();
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final border = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
-    );
+    final customer = profileData?["CustomerProfile"] as Map<String, dynamic>?;
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-      leading: IconButton(
-  icon: const Icon(Icons.arrow_back, color: Colors.black),
-  onPressed: () {
-    Navigator.pop(context); // Navigates back to the previous screen
-  },
-),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: Text(
-          'Profile Screen',
+          'My Profile',
           style: GoogleFonts.montserrat(
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -31,189 +77,65 @@ class ProfileScreen extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Profile Image
-            Center(
-              child: Stack(
-                alignment: Alignment.bottomRight,
-                children: [
-                  const CircleAvatar(
-                    radius: 50,
-                    backgroundImage: AssetImage('assets/avatar.png'),
-                  ),
-                  CircleAvatar(
-                    radius: 14,
-                    backgroundColor: Colors.white,
-                    child: Icon(Icons.edit, size: 16, color: Colors.pink),
-                  )
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator(color: Colors.pink))
+          : errorMessage != null
+              ? Center(child: Text(errorMessage!))
+              : profileData == null
+                  ? const Center(child: Text("No profile data found"))
+                  : SingleChildScrollView(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Profile Image
+                          Center(
+                            child: CircleAvatar(
+                              radius: 50,
+                              backgroundImage: (customer?["profilePicture"] != null &&
+                                      (customer?["profilePicture"] as String).isNotEmpty)
+                                  ? NetworkImage(customer!["profilePicture"])
+                                  : const AssetImage('assets/avatar.png') as ImageProvider,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
 
-            // Section: Personal Details
-            Text(
-              "Personal Details",
-              style: GoogleFonts.montserrat(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 16),
+                          _label("Name"),
+                          _info(customer?["name"] ?? "Not available"),
 
-            _label("Email Address"),SizedBox(height: 10),
-            _inputField("Enter your email",),
+                          const SizedBox(height: 12),
+                          _label("Email"),
+                          _info(profileData?["email"] ?? "Not available"),
 
-            const SizedBox(height: 12),
-            _label("Password"),SizedBox(height: 10),
-            TextField(
-              obscureText: true,
-              decoration: InputDecoration(
-                hintText: "********",
-                hintStyle: GoogleFonts.poppins(color: Colors.grey),
-               enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xffC4C4C4), width: 1),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xffC4C4C4), width: 2),
-      ),
-                suffix: Text(
-                  "Change Password",
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: Colors.pink,
-                  ),
-                ),
-              ),
-            ),
+                          const SizedBox(height: 12),
+                          _label("Phone"),
+                          _info(customer?["phone"] ?? "Not available"),
 
-            const SizedBox(height: 24),
-            const Divider(),
-            const SizedBox(height: 12),
+                          const SizedBox(height: 12),
+                          _label("Address"),
+                          _info(customer?["address"] ?? "Not available"),
 
-            // Section: Delivery Address
-            Text(
-              "Delivery Address Details",
-              style: GoogleFonts.montserrat(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 16),
+                          const SizedBox(height: 12),
+                          _label("City"),
+                          _info(customer?["city"] ?? "Not available"),
 
-            _label("Pincode"),SizedBox(height: 10),
-            _inputField("Enter pincode"),
+                          const SizedBox(height: 12),
+                          _label("State"),
+                          _info(customer?["state"] ?? "Not available"),
 
-            const SizedBox(height: 12),
-            _label("Address"),SizedBox(height: 10),
-            _inputField("Enter full address"),
+                          const SizedBox(height: 12),
+                          _label("Postal Code"),
+                          _info(customer?["postalCode"] ?? "Not available"),
 
-            const SizedBox(height: 12),
-            _label("City"),SizedBox(height: 10),
-            _inputField("Enter city name",),
-
-            const SizedBox(height: 12),
-            _label("State"),SizedBox(height: 10),
-            DropdownButtonFormField<String>(
-              value: "N1 2LL",
-              decoration: InputDecoration(
-                hintText: "Select state",
-                hintStyle: GoogleFonts.poppins(color: Colors.grey),
-              enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xffC4C4C4), width: 1),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xffC4C4C4), width: 2),
-      ),
-              ),
-              items: ["N1 2LL", "W1A 1AA", "SW1A 0AA"]
-                  .map((state) => DropdownMenuItem(
-                        value: state,
-                        child: Text(state),
-                      ))
-                  .toList(),
-              onChanged: (value) {},
-            ),
-
-            const SizedBox(height: 12),
-            _label("Country"),SizedBox(height: 10),
-            _inputField("Enter country name"),
-
-            const SizedBox(height: 24),
-            const Divider(),
-            const SizedBox(height: 12),
-
-            // Section: Bank Details
-            RichText(
-              text: TextSpan(
-                text: "Bank Account Details ",
-                style: GoogleFonts.montserrat(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black),
-                children: [
-                  TextSpan(
-                    text: "(Optional)",
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: Colors.grey,
+                          const SizedBox(height: 12),
+                          _label("Country"),
+                          _info(customer?["country"] ?? "Not available"),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            _label("Bank Account Number"),SizedBox(height: 10),
-            _inputField("Enter account number", ),
-
-            const SizedBox(height: 12),SizedBox(height: 10),
-            _label("Account Holder's Name"),
-            _inputField("Enter name",),
-
-            const SizedBox(height: 12),
-            _label("IFSC Code"),SizedBox(height: 10),
-            _inputField("Enter IFSC code"),
-
-            const SizedBox(height: 32),
-
-            // Save Button
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xffF83758),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-                child: Text(
-                  "Save",
-                  style: GoogleFonts.montserrat(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
-  // Helper: Label widget
   Widget _label(String text) {
     return Text(
       text,
@@ -225,23 +147,19 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  // Helper: Input Field
- Widget _inputField(String hint) {
-  return TextField(
-    decoration: InputDecoration(
-      hintText: hint,
-      hintStyle: GoogleFonts.poppins(color: Colors.grey),
-      enabledBorder: OutlineInputBorder(
+  Widget _info(String text) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      margin: const EdgeInsets.only(top: 4),
+      decoration: BoxDecoration(
+        border: Border.all(color: const Color(0xffC4C4C4)),
         borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xffC4C4C4), width: 1),
       ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xffC4C4C4), width: 2),
+      child: Text(
+        text,
+        style: GoogleFonts.poppins(fontSize: 14, color: Colors.black87),
       ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-    ),
-  );
-}
-
+    );
+  }
 }
