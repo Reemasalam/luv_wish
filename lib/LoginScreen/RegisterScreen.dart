@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:luve_wish/LoginScreen/Service/ProfileController.dart';
-
-import '../LoginScreen/LoginScreen.dart';
+import '/LoginScreen/LoginScreen.dart';
 
 class RegisterScreen extends StatelessWidget {
   RegisterScreen({super.key});
-  final controller = ProfileController();
+
+  final ProfileController controller = ProfileController();
 
   @override
   Widget build(BuildContext context) {
@@ -36,71 +36,75 @@ class RegisterScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Personal Details",
-              style: GoogleFonts.poppins(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Personal Details",
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-
-            _buildField(label: "Name", controller: controller.nameController),
-            const SizedBox(height: 16),
-
-            _buildField(label: "Phone number", controller: controller.phoneController),
-            const SizedBox(height: 16),
-
-            _buildField(label: "Pincode", controller: controller.pincodeController),
-            const SizedBox(height: 16),
-
-            _buildField(label: "Address", controller: controller.addressController),
-            const SizedBox(height: 16),
-
-            _buildField(label: "City", controller: controller.cityController),
-            const SizedBox(height: 16),
-
-            _buildField(label: "State", controller: controller.stateController),
-            const SizedBox(height: 16),
-
-            _buildField(label: "Country", controller: controller.countryController),
-            const SizedBox(height: 30),
-
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: () async {
-                  final success = await controller.submitProfile(context);
-                  if (success && context.mounted) {
-                    Navigator.pushReplacement(
+              const SizedBox(height: 24),
+              _buildField(label: "Full Name", controller: controller.nameController),
+              const SizedBox(height: 16),
+              _buildField(label: "Phone Number", controller: controller.phoneController),
+              const SizedBox(height: 16),
+              _buildField(label: "Pincode", controller: controller.pincodeController),
+              const SizedBox(height: 16),
+              _buildField(label: "Address", controller: controller.addressController),
+              const SizedBox(height: 16),
+              _buildField(label: "City", controller: controller.cityController),
+              const SizedBox(height: 16),
+              _buildField(label: "State", controller: controller.stateController),
+              const SizedBox(height: 16),
+              _buildField(label: "Country", controller: controller.countryController),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final success = await controller.submitProfile(
                       context,
-                      MaterialPageRoute(builder: (context) => const LoginScreen()),
+                      name: controller.nameController.text,           // ✅ Fixed
+                      phone: controller.phoneController.text,         // ✅ Fixed
+                      address: controller.addressController.text,     // ✅ Fixed
+                      city: controller.cityController.text,           // ✅ Fixed
+                      state: controller.stateController.text,         // ✅ Fixed
+                      postalCode: controller.pincodeController.text,  // ✅ Fixed
+                      country: controller.countryController.text,     // ✅ Fixed
                     );
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE91E63),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
+                    if (success && context.mounted) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => const LoginScreen()),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFE91E63),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
-                ),
-                child: Text(
-                  "Submit",
-                  style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 16,
-                    color: Colors.white,
+                  child: Text(
+                    "Submit",
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
-            )
-          ],
+              const SizedBox(height: 24),
+            ],
+          ),
         ),
       ),
     );
@@ -110,12 +114,19 @@ class RegisterScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: GoogleFonts.poppins(fontSize: 14)),
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         const SizedBox(height: 6),
         TextField(
           controller: controller,
           decoration: InputDecoration(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            hintText: "Enter $label",
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
             ),
@@ -129,8 +140,8 @@ class RegisterScreen extends StatelessWidget {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: const BorderSide(
-                color: Color(0xFF676767),
-                width: 1,
+                color: Color(0xFFE91E63),
+                width: 1.5,
               ),
             ),
           ),

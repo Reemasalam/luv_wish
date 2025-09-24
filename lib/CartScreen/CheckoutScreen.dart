@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:luve_wish/ShopScreen/PayScreen.dart';
-import 'package:luve_wish/ShopScreen/Views/OrderCard.dart';
+import 'package:luve_wish/CartScreen/PayScreen.dart';
+import 'package:luve_wish/CartScreen/Views/OrderCard.dart';
 import 'package:luve_wish/Src/AppButton.dart';
 
 class CheckoutScreen extends StatelessWidget {

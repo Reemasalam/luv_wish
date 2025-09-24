@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:luve_wish/HomeScreen/HomeView.dart';
 import 'package:luve_wish/MyOrder/MyOrderScreen.dart';
-import 'package:luve_wish/ShopScreen/Shopscreen.dart';
+import 'package:luve_wish/CartScreen/Shopscreen.dart';
 import 'package:luve_wish/Wishlist/WishlistScreen.dart';
 
 void main() {

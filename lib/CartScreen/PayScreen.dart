@@ -94,6 +94,8 @@ class _PayScreenState extends State<PayScreen> {
       ),
     );
   }
+ 
+
 
   @override
   Widget build(BuildContext context) {
@@ -139,9 +141,9 @@ class _PayScreenState extends State<PayScreen> {
             const SizedBox(height: 12),
             const Divider(),
 
-            const SizedBox(height: 20),
-            const Text("Payment", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-            const SizedBox(height: 10),
+             SizedBox(height: 20),
+             Text("Payment", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+             SizedBox(height: 10),
 
             // Payment Options
             ...List.generate(paymentOptions.length, _buildPaymentOption),

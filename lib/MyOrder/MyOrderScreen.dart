@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:luve_wish/MyOrder/TrackOrderScreen.dart';
 import 'package:luve_wish/MyOrder/Views/HistoryCard.dart';
-import 'package:luve_wish/ShopScreen/Views/OrderCard.dart';
+import 'package:luve_wish/CartScreen/Views/OrderCard.dart';
 
 class MyOrdersScreen extends StatelessWidget {
   const MyOrdersScreen({super.key});

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:luve_wish/ShopScreen/PayScreen.dart';
-import 'package:luve_wish/ShopScreen/Views/OrderCard.dart';
+import 'package:luve_wish/CartScreen/PayScreen.dart';
+import 'package:luve_wish/CartScreen/Views/OrderCard.dart';
 
 class ShoppingBagScreen extends StatelessWidget {
   const ShoppingBagScreen({super.key});

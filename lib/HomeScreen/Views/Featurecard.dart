@@ -7,7 +7,7 @@ class FeatureCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 200,width: 342,
+      height: 200,width: 390,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(23),
       ),

@@ -1,21 +1,32 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:luve_wish/HomeScreen/HomeScreen.dart';
+import 'package:luve_wish/LoginScreen/LoginScreen.dart';
 import 'package:luve_wish/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:async';
 
-class LoginController {
+class LoginController extends GetxController {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
+  final isLoading = false.obs;
+  final token = ''.obs;
+
+  Timer? _autoLogoutTimer;
 
   /// LOGIN
   Future<bool> login(BuildContext context) async {
     try {
       final response = await http.post(
         Uri.parse("$baseUrl/auth/login"),
-        headers: {"Content-Type": "application/json"},
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: jsonEncode({
           "email": emailController.text.trim(),
           "password": passwordController.text.trim(),
@@ -26,19 +37,21 @@ class LoginController {
 
       if ((response.statusCode == 200 || response.statusCode == 201) &&
           data["success"] == true) {
-        final token = data["data"]["access_token"];
+        final tokenValue = data["data"]["access_token"];
 
-        // Decode JWT to get expiry
-        final parts = token.split('.');
-        if (parts.length != 3) throw Exception("Invalid token format");
-        final payload = jsonDecode(
-          utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))),
-        );
-        final expiry = payload["exp"];
+        // Decode expiry (if JWT)
+        DateTime? expiryDate = _decodeExpiryFromJwt(tokenValue);
 
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString("token", token);
-        await prefs.setInt("expiry", expiry);
+        await prefs.setString("access_token", tokenValue);
+        if (expiryDate != null) {
+          await prefs.setInt("expiry", expiryDate.millisecondsSinceEpoch);
+        }
+
+        token.value = tokenValue;
+        accessToken = tokenValue;
+
+        print("✅ Token saved successfully");
 
         return true;
       } else {
@@ -66,8 +79,10 @@ class LoginController {
 
     try {
       final response = await http.post(
-        Uri.parse("$baseUrl/auth/register"), // replace with your full API base
-        headers: {"Content-Type": "application/json"},
+        Uri.parse("$baseUrl/auth/register"),
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: jsonEncode({
           "email": emailController.text.trim(),
           "password": passwordController.text.trim(),
@@ -76,35 +91,33 @@ class LoginController {
 
       final data = jsonDecode(response.body);
 
-      if ((response.statusCode == 201) &&
-          data["success"] == true) {
-        final token = data["data"]["access_token"];
-
-        // Decode expiry from token
-        final parts = token.split('.');
-        if (parts.length != 3) throw Exception("Invalid token format");
-        final payload = jsonDecode(
-          utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))),
-        );
-        final expiry = payload["exp"];
+      if ((response.statusCode == 201) && data["success"] == true) {
+        final tokenValue = data["data"]["access_token"];
+        DateTime? expiryDate = _decodeExpiryFromJwt(tokenValue);
 
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString("token", token);
-        await prefs.setInt("expiry", expiry);
+        await prefs.setString("access_token", tokenValue);
+        if (expiryDate != null) {
+          await prefs.setInt("expiry", expiryDate.millisecondsSinceEpoch);
+        }
+
+        token.value = tokenValue;
+        accessToken = tokenValue;
+
+        print("✅ Token saved successfully");
 
         return true;
       } else {
-       String message;
-if (data["message"] is List) {
-  message = (data["message"] as List).join(", ");
-} else {
-  message = data["message"]?.toString() ?? "Registration failed";
-}
+        String message;
+        if (data["message"] is List) {
+          message = (data["message"] as List).join(", ");
+        } else {
+          message = data["message"]?.toString() ?? "Registration failed";
+        }
 
-ScaffoldMessenger.of(context).showSnackBar(
-  SnackBar(content: Text(message)),
-);
-
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message)),
+        );
         return false;
       }
     } catch (e) {
@@ -115,23 +128,20 @@ ScaffoldMessenger.of(context).showSnackBar(
     }
   }
 
-  /// Check if token exists and not expired
-  
+  /// Check if user is logged in
   static Future<bool> isLoggedIn() async {
     final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString("token");
-    final expiry = prefs.getInt("expiry");
+    final token = prefs.getString("access_token");
+    final expiryMillis = prefs.getInt("expiry");
 
-    if (token == null || expiry == null) return false;
+    if (token == null) return false;
 
-    final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    if (expiry > now) {
-      return true;
-    } else {
-      await prefs.remove("token");
-      await prefs.remove("expiry");
-      return false;
+    if (expiryMillis != null) {
+      final expiryDate = DateTime.fromMillisecondsSinceEpoch(expiryMillis);
+      return expiryDate.isAfter(DateTime.now());
     }
+
+    return true; // If no expiry, assume valid
   }
 
   /// Logout
@@ -139,5 +149,75 @@ ScaffoldMessenger.of(context).showSnackBar(
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
     Navigator.pushReplacementNamed(context, "/login");
+  }
+
+  DateTime? _decodeExpiryFromJwt(String jwt) {
+    try {
+      final parts = jwt.split('.');
+      if (parts.length != 3) return null;
+
+      final payload = utf8.decode(base64Url.decode(base64Url.normalize(parts[1])));
+      final payloadMap = json.decode(payload);
+      final exp = payloadMap['exp'];
+
+      if (exp != null) {
+        return DateTime.fromMillisecondsSinceEpoch(exp * 1000);
+      }
+    } catch (e) {
+      print("Failed to decode token expiry: $e");
+    }
+    return null;
+  }
+
+  void scheduleAutoLogout(DateTime expiryTime) {
+    _autoLogoutTimer?.cancel();
+    final duration = expiryTime.difference(DateTime.now());
+
+    if (duration.isNegative) {
+      logoutAdmin();
+    } else {
+      _autoLogoutTimer = Timer(duration, () => logoutAdmin());
+    }
+  }
+
+  Future<void> logoutAdmin() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    token.value = '';
+    _autoLogoutTimer?.cancel();
+
+    Fluttertoast.showToast(
+      msg: "You have been logged out.",
+    );
+    Get.offAll(() => const LoginScreen());
+  }
+
+  Future<void> tryAutoLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedToken = prefs.getString('access_token');
+    final expiryMillis = prefs.getInt('expiry');
+
+    if (savedToken == null) {
+      Get.offAll(() => const LoginScreen());
+      return;
+    }
+
+    if (expiryMillis != null) {
+      final expiryDate = DateTime.fromMillisecondsSinceEpoch(expiryMillis);
+
+      if (expiryDate.isAfter(DateTime.now())) {
+        token.value = savedToken;
+        accessToken = savedToken;
+        scheduleAutoLogout(expiryDate);
+        Get.offAll(() => const HomeScreen());
+      } else {
+        await logoutAdmin();
+      }
+    } else {
+      // No expiry stored → assume valid
+      token.value = savedToken;
+      accessToken = savedToken;
+      Get.offAll(() => const HomeScreen());
+    }
   }
 }

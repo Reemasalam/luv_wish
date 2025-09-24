@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:luve_wish/HomeScreen/Views/ProductCard.dart';
-import 'package:luve_wish/ShopScreen/CheckoutScreen.dart';
+import 'package:luve_wish/CartScreen/CheckoutScreen.dart';
 import 'package:luve_wish/ShoppingBagScreen/ShoppingBagScreen.dart';
 import 'package:luve_wish/Src/AppButton.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -214,8 +214,8 @@ Row(
             // Related Products
             Text("Related Products", style: GoogleFonts.montserrat(fontWeight: FontWeight.w600, fontSize: 16)),
             const SizedBox(height: 12),
-            const ProductCard(),
-            const ProductCard(),
+           // const ProductCard(),
+            //const ProductCard(),
           ],
         ),
       ),

@@ -3,12 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:luve_wish/HomeScreen/HomeScreen.dart';
-
-//import 'package:luve_wish/HomeScreen/HomeView.dart';
 import 'package:luve_wish/LoginScreen/ForgetScreen.dart';
 import 'package:luve_wish/LoginScreen/Service/AutheticationController.dart';
 import 'package:luve_wish/LoginScreen/SignUpScreen.dart';
-
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,6 +17,9 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final LoginController _controller = LoginController();
   bool isLoading = false;
+
+  // 👇 Keep state for password visibility
+  bool _obscurePassword = true;
 
   Future<void> handleLogin() async {
     setState(() => isLoading = true);
@@ -78,8 +78,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     );
                   },
                   child: Text("Forgot Password?",
-                      style:
-                          GoogleFonts.poppins(color: Colors.pink, fontSize: 14)),
+                      style: GoogleFonts.poppins(
+                          color: Colors.pink, fontSize: 14)),
                 ),
               ),
               const SizedBox(height: 30),
@@ -142,8 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) =>
-                                         SignUpScreen()));
+                                    builder: (context) => SignUpScreen()));
                           },
                       ),
                     ],
@@ -157,6 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  // ✅ Single correct input field builder
   Widget _buildInputField({
     required TextEditingController controller,
     required String hintText,
@@ -165,17 +165,32 @@ class _LoginScreenState extends State<LoginScreen> {
   }) {
     return TextField(
       controller: controller,
-      obscureText: isPassword,
+      obscureText: isPassword ? _obscurePassword : false,
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: GoogleFonts.montserrat(
-            fontSize: 12,
-            fontWeight: FontWeight.w400,
-            color: const Color(0xff676767)),
+          fontSize: 12,
+          fontWeight: FontWeight.w400,
+          color: const Color(0xff676767),
+        ),
         prefixIcon: Icon(icon),
-        suffixIcon:
-            isPassword ? const Icon(Icons.remove_red_eye_outlined) : null,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        suffixIcon: isPassword
+            ? IconButton(
+                icon: Icon(
+                  _obscurePassword
+                      ? Icons.visibility_off
+                      : Icons.visibility,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _obscurePassword = !_obscurePassword;
+                  });
+                },
+              )
+            : null,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
         filled: true,
         fillColor: Colors.grey[100],
         contentPadding: const EdgeInsets.symmetric(horizontal: 20),
