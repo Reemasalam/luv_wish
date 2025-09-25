@@ -14,14 +14,6 @@ class HomeMainScreen extends StatelessWidget {
 
   final ProductController productController = Get.put(ProductController());
 
-  //final List<Map<String, dynamic>> categories = const [
-    //{"label": "Sanitary Pads", "icon": Icons.local_offer},
-   // {"label": "Hygiene Products", "icon": Icons.health_and_safety},
-   // {"label": "Body Lotions", "icon": Icons.spa},
-   // {"label": "Makeup", "icon": Icons.brush},
-   // {"label": "Skin Care", "icon": Icons.face},
- // ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,9 +76,6 @@ class HomeMainScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // 📂 Categories
-            //_buildCategories(),
-
             const SizedBox(height: 25),
 
             // 🛒 Deal of the Day
@@ -101,40 +90,33 @@ class HomeMainScreen extends StatelessWidget {
             const SizedBox(height: 12),
 
             // ✅ Product Cards (Dynamic with GetX)
-           
-          // ✅ Product Cards (Dynamic with GetX)
-Obx(() {
-  if (productController.isLoading.value) {
-    return const Center(child: CircularProgressIndicator());
-  }
-  if (productController.error.value != null) {
-    return Center(child: Text(productController.error.value!));
-  }
-  if (productController.products.isEmpty) {
-    return const Center(child: Text("No products available"));
-  }
+            Obx(() {
+              if (productController.isLoading.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (productController.error.value != null) {
+                return Center(child: Text(productController.error.value!));
+              }
+              if (productController.filteredProducts.isEmpty) {
+                return const Center(child: Text("No products available"));
+              }
 
-  // Optional: maintain quantity per product
-  Map<String, int> quantities = {}; // key = product.id
+              return ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: productController.filteredProducts.length,
+                itemBuilder: (context, index) {
+                  final product = productController.filteredProducts[index];
 
-  return  ListView.builder(
-  shrinkWrap: true,
-  physics: const NeverScrollableScrollPhysics(),
-  itemCount: productController.products.length,
-  itemBuilder: (context, index) {
-    final product = productController.products[index];
-
-    return ProductCard(
-      product: product, // 👈 pass product here
-      onAddToWish: () {
-        // TODO: integrate wishlist API
-        Get.snackbar("Wishlist", "${product.name} added to wishlist!");
-      },
-    );
-  },
-);
-
-}),
+                  return ProductCard(
+                    product: product,
+                    onAddToWish: () {
+                      Get.snackbar("Wishlist", "${product.name} added to wishlist!");
+                    },
+                  );
+                },
+              );
+            }),
 
             const SizedBox(height: 20),
 
@@ -164,27 +146,31 @@ Obx(() {
     );
   }
 
-  // --- UI Sub-widgets ---
-  Widget _buildSearchBar() => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF9F9F9),
-          borderRadius: BorderRadius.circular(6),
+  // --- Search Bar ---
+  Widget _buildSearchBar() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF9F9F9),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: TextField(
+        onChanged: (value) => productController.setSearch(value),
+        style: const TextStyle(color: Color(0xFF000000), fontSize: 14),
+        decoration: const InputDecoration(
+          hintText: 'Search any Product...',
+          hintStyle: TextStyle(color: Color(0xFFBBBBBB), fontSize: 15),
+          border: InputBorder.none,
+          isDense: true,
+          contentPadding: EdgeInsets.symmetric(vertical: 12),
+          icon: Icon(Icons.search, color: Color(0xFFBBBBBB)),
+          suffixIcon: Icon(Icons.mic_none_outlined, color: Color(0xFFBBBBBB)),
         ),
-        child: const TextField(
-          style: TextStyle(color: Color(0xFFBBBBBB), fontSize: 14),
-          decoration: InputDecoration(
-            hintText: 'Search any Product...',
-            hintStyle: TextStyle(color: Color(0xFFBBBBBB), fontSize: 15),
-            border: InputBorder.none,
-            isDense: true,
-            contentPadding: EdgeInsets.symmetric(vertical: 12),
-            icon: Icon(Icons.search, color: Color(0xFFBBBBBB)),
-            suffixIcon: Icon(Icons.mic_none_outlined, color: Color(0xFFBBBBBB)),
-          ),
-        ),
-      );
+      ),
+    );
+  }
 
+  // --- Featured Header with Sort & Filter ---
   Widget _buildFeaturedHeader() => Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -194,7 +180,48 @@ Obx(() {
           Row(
             children: [
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Get.bottomSheet(
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius:
+                            BorderRadius.vertical(top: Radius.circular(16)),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text("Sort by Price",
+                              style: GoogleFonts.montserrat(
+                                  fontSize: 16, fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 10),
+                          ListTile(
+                            title: const Text("Low to High"),
+                            onTap: () {
+                              productController.setSort("asc");
+                              Get.back();
+                            },
+                          ),
+                          ListTile(
+                            title: const Text("High to Low"),
+                            onTap: () {
+                              productController.setSort("desc");
+                              Get.back();
+                            },
+                          ),
+                          ListTile(
+                            title: const Text("Clear Sort"),
+                            onTap: () {
+                              productController.setSort("");
+                              Get.back();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.black,
                   backgroundColor: const Color(0xFFFAF9F9),
@@ -209,7 +236,58 @@ Obx(() {
               ),
               const SizedBox(width: 8),
               ElevatedButton.icon(
-                onPressed: () {},
+                onPressed: () {
+                  Get.bottomSheet(
+                    StatefulBuilder(
+                      builder: (context, setState) {
+                        RangeValues range =
+                            productController.priceRange.value ??
+                                const RangeValues(0, 1000);
+                        return Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(16)),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text("Filter by Price",
+                                  style: GoogleFonts.montserrat(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600)),
+                              const SizedBox(height: 20),
+                              RangeSlider(
+                                values: range,
+                                min: 0,
+                                max: 5000,
+                                divisions: 100,
+                                labels: RangeLabels(
+                                    "₹${range.start.round()}",
+                                    "₹${range.end.round()}"),
+                                onChanged: (val) {
+                                  setState(() => range = val);
+                                },
+                                onChangeEnd: (val) {
+                                  productController.setPriceFilter(val);
+                                },
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  productController.priceRange.value = null;
+                                  productController.applyFilters();
+                                  Get.back();
+                                },
+                                child: const Text("Reset"),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.black,
                   backgroundColor: const Color(0xFFFAF9F9),
@@ -227,56 +305,6 @@ Obx(() {
           )
         ],
       );
-
-  //Widget _buildCategories() => Column(
-    //    crossAxisAlignment: CrossAxisAlignment.start,
-      //  children: [
-        //  Text("Select Category",
-          //    style: GoogleFonts.poppins(
-            //      fontSize: 18, fontWeight: FontWeight.w600)),
-         // const SizedBox(height: 12),
-          //SizedBox(
-            //height: 100,
-           // child: ListView.separated(
-             // scrollDirection: Axis.horizontal,
-            //  itemCount: categories.length,
-            //  separatorBuilder: (context, index) => const SizedBox(width: 16),
-             /// itemBuilder: (context, index) {
-               // final category = categories[index];
-               // return Column(
-                 // children: [
-                   // GestureDetector(
-                     /// onTap: () {
-                        // TODO: Filter products by category
-                     // },
-                     /// child: Container(
-                      //  width: 60,
-                        //height: 60,
-                       // decoration: BoxDecoration(
-                         /// color: Colors.pink.shade100,
-                         // shape: BoxShape.circle,
-                       // ),
-                        //child: Icon(category["icon"],
-                         //   color: Colors.pink, size: 30),
-                     // ),
-                    //),
-                    //const SizedBox(height: 5),
-                    //SizedBox(
-                     // width: 70,
-                      //child: Text(category["label"],
-                        //  style: GoogleFonts.poppins(
-                          //    fontSize: 12, fontWeight: FontWeight.w500),
-                          //textAlign: TextAlign.center,
-                         // maxLines: 2,
-                         // overflow: TextOverflow.ellipsis),
-                   // )
-                  //],
-                //);
-              //},
-            //),
-         // ),
-        //],
-      //);
 
   Widget _buildDealOfTheDay() => Container(
         padding: const EdgeInsets.all(16),

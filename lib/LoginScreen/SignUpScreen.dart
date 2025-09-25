@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:luve_wish/LoginScreen/ForgetScreen.dart';
@@ -10,7 +11,11 @@ import 'package:luve_wish/LoginScreen/Service/AutheticationController.dart';
 class SignUpScreen extends StatelessWidget {
   SignUpScreen({super.key});
 
-  final LoginController controller = LoginController();
+  final LoginController controller = Get.put(LoginController());
+
+  // ✅ Observables for password visibility
+  final RxBool _obscurePassword = true.obs;
+  final RxBool _obscureConfirmPassword = true.obs;
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +23,7 @@ class SignUpScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Center(
-          child: SingleChildScrollView(   // ✅ Added scroll to avoid overflow on small screens
+          child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,55 +37,58 @@ class SignUpScreen extends StatelessWidget {
                         fontSize: 36, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 30),
 
-                // Full Name
-        
-
-                // Email
+                // Email / Username
                 _buildInputField(
-                  hintText: "Usernmae or Email",
+                  hintText: "Username or Email",
                   icon: Icons.email,
                   controller: controller.emailController,
                 ),
                 const SizedBox(height: 20),
 
                 // Password
-                _buildInputField(
-                  hintText: "Password",
-                  icon: Icons.lock,
-                  isPassword: true,
-                  controller: controller.passwordController,
-                ),
+                Obx(() => _buildInputField(
+                      hintText: "Password",
+                      icon: Icons.lock,
+                      controller: controller.passwordController,
+                      isPassword: true,
+                      obscureText: _obscurePassword.value,
+                      onToggle: () =>
+                          _obscurePassword.value = !_obscurePassword.value,
+                    )),
                 const SizedBox(height: 20),
 
                 // Confirm Password
-                _buildInputField(
-                  hintText: "Confirm Password",
-                  icon: Icons.lock,
-                  isPassword: true,
-                  controller: controller.confirmPasswordController,
-                ),
+                Obx(() => _buildInputField(
+                      hintText: "Confirm Password",
+                      icon: Icons.lock,
+                      controller: controller.confirmPasswordController,
+                      isPassword: true,
+                      obscureText: _obscureConfirmPassword.value,
+                      onToggle: () => _obscureConfirmPassword.value =
+                          !_obscureConfirmPassword.value,
+                    )),
                 const SizedBox(height: 20),
-                  RichText(
-  text: TextSpan(
-    style: GoogleFonts.montserrat(
-      fontSize: 12,
-      fontWeight: FontWeight.w500,
-      color: const Color(0xff676767),
-    ),
-    children: [
-      const TextSpan(text: "By clicking the "),
-      TextSpan(
-        text: "Register",
-        style: const TextStyle(color: Colors.red),
-        recognizer: TapGestureRecognizer()
-          ..onTap = () {
-          
-          },
-      ),
-      const TextSpan(text: " button, you agree\nto the public offer"),
-    ],
-  ),
-),
+
+                // Terms & Register Notice
+                RichText(
+                  text: TextSpan(
+                    style: GoogleFonts.montserrat(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xff676767),
+                    ),
+                    children: [
+                      const TextSpan(text: "By clicking the "),
+                      TextSpan(
+                        text: "Register",
+                        style: const TextStyle(color: Colors.red),
+                        recognizer: TapGestureRecognizer()..onTap = () {},
+                      ),
+                      const TextSpan(
+                          text: " button, you agree\nto the public offer"),
+                    ],
+                  ),
+                ),
 
                 const SizedBox(height: 30),
                 Center(
@@ -94,7 +102,7 @@ class SignUpScreen extends StatelessWidget {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>   RegisterScreen()),
+                                builder: (context) => RegisterScreen()),
                           );
                         }
                       },
@@ -113,7 +121,6 @@ class SignUpScreen extends StatelessWidget {
                 ),
 
                 const SizedBox(height: 40),
-
                 Center(
                   child: Text(
                     "- OR Continue with -",
@@ -122,28 +129,30 @@ class SignUpScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
+                // Social Buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: const [
                     _SocialLoginButton(
                       icon: FontAwesomeIcons.google,
-                      iconColor: Color(0xFFDB4437), // Google Red
+                      iconColor: Color(0xFFDB4437),
                     ),
                     SizedBox(width: 20),
                     _SocialLoginButton(
                       icon: FontAwesomeIcons.apple,
-                      iconColor: Colors.black, // Apple Black
+                      iconColor: Colors.black,
                     ),
                     SizedBox(width: 20),
                     _SocialLoginButton(
                       icon: FontAwesomeIcons.facebookF,
-                      iconColor: Color(0xFF1877F2), // Facebook Blue
+                      iconColor: Color(0xFF1877F2),
                     ),
                   ],
                 ),
 
                 const SizedBox(height: 30),
 
+                // Login Link
                 Center(
                   child: RichText(
                     text: TextSpan(
@@ -182,12 +191,14 @@ class SignUpScreen extends StatelessWidget {
   Widget _buildInputField({
     required String hintText,
     required IconData icon,
-    required TextEditingController controller, // ✅ added controller param
+    required TextEditingController controller,
     bool isPassword = false,
+    bool obscureText = false,
+    VoidCallback? onToggle,
   }) {
     return TextField(
-      controller: controller, // ✅ now linked to controller
-      obscureText: isPassword,
+      controller: controller,
+      obscureText: isPassword ? obscureText : false,
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: GoogleFonts.montserrat(
@@ -196,8 +207,15 @@ class SignUpScreen extends StatelessWidget {
           color: const Color(0xff676767),
         ),
         prefixIcon: Icon(icon),
-        suffixIcon:
-            isPassword ? const Icon(Icons.remove_red_eye_outlined) : null,
+        suffixIcon: isPassword
+            ? IconButton(
+                icon: Icon(
+                  obscureText ? Icons.visibility_off : Icons.visibility,
+                  color: Colors.grey,
+                ),
+                onPressed: onToggle,
+              )
+            : null,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
         ),
