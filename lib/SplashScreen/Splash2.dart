@@ -1,111 +1,56 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:luve_wish/SplashScreen/ProductScreen.dart';
 
-class Splash2Screen extends StatelessWidget {
+class Splash2Screen extends StatefulWidget {
   const Splash2Screen({super.key});
+
+  @override
+  State<Splash2Screen> createState() => _Splash2ScreenState();
+}
+
+class _Splash2ScreenState extends State<Splash2Screen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Animate logo fade-in
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
+    _controller.forward();
+
+    // Navigate after 2 seconds
+    Future.delayed(const Duration(seconds: 2), () {
+      Get.off(() => const ProductScreen());
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Image.asset(
-              'assets/paste.png',
-              height: 440,
-              width: 638,
-              fit: BoxFit.contain,
-            ),
-            const SizedBox(height: 40),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.0),
-              child: Text(
-                "Choose Products",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  fontFamily: 'Montserrat',
-                  color: Colors.black87,
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              "Because your body deserves the best \n  naturally and lovingly",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                fontFamily: 'Montserrat',
-                color: Colors.black87,
-              ),
-            ),
-
-            const Spacer(), // Push controls to bottom
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Prev
-                  TextButton(
-                    onPressed: () {
-                      // TODO: Handle previous action
-                    },
-                    child: const Text(
-                      "Prev",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'Montserrat',
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-
-                  // Dot
-                  Row(
-                    children: List.generate(3, (index) {
-                      return Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        width: index == 0 ? 12 : 8,
-                        height: index == 0 ? 12 : 8,
-                        decoration: BoxDecoration(
-                          color: index == 0 ? Colors.black : Colors.grey,
-                          shape: BoxShape.circle,
-                        ),
-                      );
-                    }),
-                  ),
-
-                  // Next
-                  TextButton(
-                  onPressed: () {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => const ProductScreen(),
-    ),
-  );
-},
-
-                    child: const Text(
-                      "Next",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'Montserrat',
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+      backgroundColor: const Color(0xffEB147D),
+      body: Center(
+        child: FadeTransition(
+          opacity: _animation,
+          child: Image.asset(
+            'assets/Logo2.png',
+            height: 82.h,
+            fit: BoxFit.contain,
+          ),
         ),
       ),
     );

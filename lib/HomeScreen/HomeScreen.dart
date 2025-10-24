@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:luve_wish/HomeScreen/HomeView.dart';
-import 'package:luve_wish/MyOrder/MyOrderScreen.dart';
-import 'package:luve_wish/CartScreen/Shopscreen.dart';
+import 'package:luve_wish/ProfileScreen/ProfileScreen.dart';
 import 'package:luve_wish/Wishlist/WishlistScreen.dart';
+import 'package:luve_wish/CartScreen/CheckoutScreen.dart';
+import 'package:luve_wish/MyOrder/MyOrderScreen.dart';
 
 void main() {
   runApp(const MaterialApp(home: HomeScreen()));
@@ -22,10 +22,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> _pages = [
     HomeMainScreen(),
-     WishlistScreen(),
-     ShopScreen(),
-     MyOrdersScreen(),
-    Center(child: Text("Settings")),
+    WishlistScreen(),
+    CheckoutScreen(),
+    MyOrderScreen(),
+    ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -35,86 +35,47 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(child: _pages[_selectedIndex]),
-      bottomNavigationBar: Stack(
-        alignment: Alignment.bottomCenter,
-        children: [
-          SafeArea(
-            child: Container(
-              height: 70,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _navItem(icon: Icons.home_outlined, label: 'Home', index: 0),
-                  _navItem(icon: Icons.favorite_border, label: 'Wishlist', index: 1),
-                  const SizedBox(width: 60), // space for the cart icon
-                  _navItem(icon: Icons.search, label: 'Search', index: 3),
-                  _navItem(icon: Icons.settings, label: 'Setting', index: 4),
-                ],
-              ),
-            ),
-          ),
-
-          // Floating Cart Button in Center
-          Positioned(
-            top: -10,
-            child: GestureDetector(
-              onTap: () => _onItemTapped(2),
-              child: Container(
-                height: 60,
-                width: 60,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(color: Colors.black12, blurRadius: 6),
-                  ],
-                ),
-                child: Icon(
-                  Icons.shopping_cart_outlined,
-                  size: 30,
-                  color: _selectedIndex == 2 ? Colors.pink : Colors.black,
-                ),
-              ),
-            ),
-          ),
-        ],
+  @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: SafeArea(child: _pages[_selectedIndex]),
+    bottomNavigationBar: SafeArea(
+      child: Container(
+        height: 70,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(color: Colors.black12, blurRadius: 4),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _navIcon(icon: Icons.home_outlined, selectedIcon: Icons.home, index: 0),
+            _navIcon(icon: Icons.favorite_border, selectedIcon: Icons.favorite, index: 1),
+            _navIcon(icon: Icons.local_shipping, selectedIcon: Icons.local_shipping, index: 2),
+            _navIcon(icon: Icons.card_giftcard, selectedIcon: Icons.card_giftcard, index: 3),
+            _navIcon(icon: Icons.person_outline, selectedIcon: Icons.person, index: 4),
+          ],
+        ),
       ),
-    );
-  }
+    ),
+  );
+}
 
-  Widget _navItem({
+
+  Widget _navIcon({
     required IconData icon,
-    required String label,
+    required IconData selectedIcon,
     required int index,
   }) {
-    final isSelected = _selectedIndex == index;
+    final bool isSelected = _selectedIndex == index;
     return GestureDetector(
       onTap: () => _onItemTapped(index),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            color: isSelected ? Colors.pink : Colors.black,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: GoogleFonts.poppins(
-              fontSize: 12,
-              color: isSelected ? Colors.pink : Colors.black,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-            ),
-          )
-        ],
+      child: Icon(
+        isSelected ? selectedIcon : icon,
+        size: 30,
+        color: isSelected ? const Color(0xffC61469) : Colors.grey,
       ),
     );
   }

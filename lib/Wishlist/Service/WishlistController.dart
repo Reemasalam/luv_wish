@@ -20,7 +20,12 @@ class WishlistController extends GetxController {
   void setMinPrice(double value) => minPrice.value = value;
   void setMaxPrice(double value) => maxPrice.value = value;
 
-  /// Add a product to wishlist
+  /// ✅ Helper: Check if a product is already wishlisted
+  bool isProductWishlisted(String productId) {
+    return wishlistItems.any((item) => item.product?.id == productId);
+  }
+
+  /// ✅ Add a product to wishlist
   Future<void> addToWishlist(String productId) async {
     try {
       isLoading.value = true;
@@ -67,7 +72,7 @@ class WishlistController extends GetxController {
     }
   }
 
-  /// Fetch wishlist
+  /// ✅ Fetch wishlist
   Future<void> fetchWishlist({int page = 1, int limit = 10}) async {
     try {
       isLoading.value = true;
@@ -108,7 +113,7 @@ class WishlistController extends GetxController {
     }
   }
 
-  /// Remove item from wishlist
+  /// ✅ Remove item from wishlist
   Future<void> removeFromWishlist(String wishlistItemId) async {
     try {
       isLoading.value = true;
@@ -147,7 +152,7 @@ class WishlistController extends GetxController {
     }
   }
 
-  /// Get filtered & sorted wishlist
+  /// ✅ Filtered & sorted wishlist
   List<WishlistProduct> get filteredWishlist {
     var list = wishlistItems
         .where((item) =>

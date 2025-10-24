@@ -26,6 +26,7 @@ class LoginController extends GetxController {
         Uri.parse("$baseUrl/auth/login"),
         headers: {
           'Content-Type': 'application/json',
+           'Authorization': 'Bearer $accessToken',
         },
         body: jsonEncode({
           "email": emailController.text.trim(),

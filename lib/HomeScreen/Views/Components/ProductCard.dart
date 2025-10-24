@@ -1,44 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:luve_wish/Wishlist/Model/WishlistProductModel.dart';
 
-class WishlistProductCard extends StatelessWidget {
-  const WishlistProductCard({
+class ProductCardSym extends StatelessWidget {
+  const ProductCardSym({
     super.key,
-    required this.wishlistProduct,
+    required this.imageUrl,
+    required this.title,
+    required this.price,
+    required this.mrp,
+    this.discountPercent,
     this.onTap,
     this.onMoveToBag,
   });
 
-  final WishlistProduct wishlistProduct;
+  final String imageUrl;
+  final String title;
+  final double price;
+  final double mrp;
+  final int? discountPercent;
   final VoidCallback? onTap;
   final VoidCallback? onMoveToBag;
 
   @override
   Widget build(BuildContext context) {
-    final product = wishlistProduct.product;
-    if (product == null) {
-      return const SizedBox(); // Or show a placeholder if product is null
-    }
-
-    final price = product.discountedPrice;
-    final mrp = product.actualPrice;
-    final discountPercent =
-        mrp > price ? (((mrp - price) / mrp) * 100).round() : 0;
-
     return InkWell(
       onTap: onTap,
       child: Container(
+     
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(7),
           boxShadow: [
             BoxShadow(
               color: Colors.grey.withOpacity(0.1),
               blurRadius: 5,
               offset: const Offset(0, 3),
-            ),
+            )
           ],
         ),
         child: Row(
@@ -51,14 +49,12 @@ class WishlistProductCard extends StatelessWidget {
                 width: 86,
                 height: 86,
                 color: const Color(0xFFF6ECFF),
-                child: product.description.isNotEmpty
-                    ? Image.network(
-                        product.description, // Use product image URL if available
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) =>
-                            const Icon(Icons.image, color: Colors.white),
-                      )
-                    : const Icon(Icons.image, color: Colors.white),
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) =>
+                      const Icon(Icons.image, color: Colors.white),
+                ),
               ),
             ),
             const SizedBox(width: 20),
@@ -69,7 +65,7 @@ class WishlistProductCard extends StatelessWidget {
                 children: [
                   // Title
                   Text(
-                    product.name,
+                    title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
@@ -101,9 +97,9 @@ class WishlistProductCard extends StatelessWidget {
                           ),
                         ),
                       const SizedBox(width: 10),
-                      if (discountPercent > 0)
+                      if (discountPercent != null && discountPercent! > 0)
                         Text(
-                          "$discountPercent% off",
+                          "${discountPercent}% off",
                           style: GoogleFonts.montserrat(
                             fontSize: 12,
                             color: const Color(0xFF21A144),
@@ -128,7 +124,7 @@ class WishlistProductCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                       ),
                       child: Text(
-                        "Move to Bag",
+                        "Shop Now",
                         style: GoogleFonts.montserrat(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
@@ -145,4 +141,3 @@ class WishlistProductCard extends StatelessWidget {
     );
   }
 }
-

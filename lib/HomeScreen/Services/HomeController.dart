@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:luve_wish/HomeScreen/Models/ProductDetailModel.dart';
 import 'package:luve_wish/HomeScreen/Models/ProductModel.dart';
 import 'package:luve_wish/main.dart';
 
@@ -10,6 +11,7 @@ class ProductController extends GetxController {
   var filteredProducts = <Product>[].obs; // after search/sort/filter
   var isLoading = false.obs;
   var error = RxnString();
+  var product = Rxn<ProductDetail>();
 
   var searchQuery = "".obs;
   var sortOrder = "".obs; // "asc", "desc", or ""
@@ -102,5 +104,29 @@ class ProductController extends GetxController {
   void onInit() {
     super.onInit();
     fetchProducts();
+  }
+
+Future<void> fetchProductDetail(String id) async {
+    try {
+      isLoading.value = true;
+      error.value = null;
+
+      final response = await http.get(Uri.parse("$baseUrl/products/$id"));
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        if (jsonData['success'] == true) {
+          product.value = ProductDetail.fromJson(jsonData['data']);
+        } else {
+          error.value = "API returned success=false";
+        }
+      } else {
+        error.value = "Failed to load product: ${response.statusCode}";
+      }
+    } catch (e) {
+      error.value = "Exception: $e";
+    } finally {
+      isLoading.value = false;
+    }
   }
 }

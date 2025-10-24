@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:luve_wish/ProfileScreen/ProfileScreen.dart';
+import 'package:luve_wish/HomeScreen/Views/ProductDetailScreen.dart';
+import 'package:luve_wish/CartScreen/Services/CartController.dart';
 import 'package:luve_wish/Wishlist/Service/WishlistController.dart';
 import 'package:luve_wish/Wishlist/Views/WishlistProductCard.dart';
 
@@ -11,7 +12,7 @@ class WishlistScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final wishlistController = Get.put(WishlistController());
-    final searchController = TextEditingController();
+    final cartController = Get.put(CartController());
 
     // Fetch wishlist when screen opens
     wishlistController.fetchWishlist();
@@ -21,254 +22,121 @@ class WishlistScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
+        centerTitle: false,
+        title: Image.asset(
+          'assets/logo.png',
+          height: 23,
+          fit: BoxFit.contain,
         ),
-        title: Text(
-          "LUVWISH",
-          style: GoogleFonts.libreCaslonText(
-            fontSize: 18,
-            color: const Color(0xffEB147D),
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        centerTitle: true,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
-                );
-              },
-              child: const Icon(Icons.person, color: Colors.black, size: 24),
-            ),
-          ),
-        ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
+      body: Obx(() {
+        if (wishlistController.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        var filteredWishlist = wishlistController.filteredWishlist;
+
+        if (filteredWishlist.isEmpty) {
+          return const Center(
+            child: Text("No items in wishlist", style: TextStyle(fontSize: 16)),
+          );
+        }
+
+        // Check if there are any out-of-stock items
+        bool hasOutOfStock = filteredWishlist.any((item) =>
+            item.product == null || item.product!.stockCount == 0);
+
+        return Column(
           children: [
-            // Search Bar
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: TextField(
-                controller: searchController,
-                onChanged: wishlistController.setSearchQuery,
-                style: const TextStyle(
-                  color: Color(0xFFBBBBBB),
-                  fontSize: 14,
+            // Wishlist List
+           Expanded(
+  child: ListView.builder(
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    itemCount: filteredWishlist.length + 1, // +1 for "Move All to Bag" button
+    itemBuilder: (context, index) {
+      if (index < filteredWishlist.length) {
+        final wishlistItem = filteredWishlist[index];
+        final product = wishlistItem.product;
+        if (product == null) return const SizedBox();
+
+        return Column(
+          children: [
+            WishlistProductCard(
+              wishlistProduct: wishlistItem,
+              onTap: () => Get.to(() => ProductDetailScreen(product: product)),
+              onMoveToBag: () async {
+                if (product.stockCount > 0) {
+                  await cartController.addToCart(product.id, 1);
+                  wishlistController.removeFromWishlist(wishlistItem.wishlistId);
+                } else {
+                  Get.snackbar(
+                    "Out of Stock",
+                    "${product.name} is out of stock",
+                    snackPosition: SnackPosition.BOTTOM,
+                  );
+                }
+              },
+            ),
+            const SizedBox(height: 16),
+          ],
+        );
+      } else {
+        // Move All to Bag button
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: SizedBox(
+            width: double.infinity,
+            height: 45,
+            child: OutlinedButton(
+              onPressed: () async {
+                bool anyOutOfStock = false;
+                for (var item in filteredWishlist) {
+                  final product = item.product;
+                  if (product != null && product.stockCount > 0) {
+                    await cartController.addToCart(product.id, 1);
+                    wishlistController.removeFromWishlist(item.wishlistId);
+                  } else {
+                    anyOutOfStock = true;
+                  }
+                }
+
+                if (anyOutOfStock) {
+                  Get.snackbar(
+                    "Notice",
+                    "Some items were out of stock",
+                    snackPosition: SnackPosition.BOTTOM,
+                  );
+                }
+              },
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Color(0xFFBFBFBF), width: 1.5),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
                 ),
-                decoration: InputDecoration(
-                  hintText: 'Search any Product...',
-                  hintStyle: const TextStyle(
-                    color: Color(0xFFBBBBBB),
-                    fontSize: 15,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide.none,
-                  ),
-                  filled: true,
-                  fillColor: const Color(0xFFF9F9F9),
-                  isDense: true,
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                  prefixIcon: const Icon(Icons.search, color: Color(0xFFBBBBBB)),
-                  suffixIcon:
-                      const Icon(Icons.mic_none_outlined, color: Color(0xFFBBBBBB)),
+              ),
+              child: Text(
+                "Move All to Bag",
+                style: GoogleFonts.montserrat(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black,
                 ),
               ),
             ),
-
-            // Sort & Filter buttons
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () {
-                    _showSortDialog(context, wishlistController);
-                  },
-                  icon: const Icon(Icons.sort, size: 16),
-                  label: const Text("Sort"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey.shade200,
-                    foregroundColor: Colors.black,
-                    elevation: 0,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    _showFilterDialog(context, wishlistController);
-                  },
-                  icon: const Icon(Icons.tune, size: 16),
-                  label: const Text("Filter"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey.shade200,
-                    foregroundColor: Colors.black,
-                    elevation: 0,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            // Wishlist Products List
-            Expanded(
-              child: Obx(() {
-                if (wishlistController.isLoading.value) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                var filteredWishlist = wishlistController.filteredWishlist;
-
-                if (filteredWishlist.isEmpty) {
-                  return const Center(
-                      child: Text("No items in wishlist",
-                          style: TextStyle(fontSize: 16)));
-                }
-
-                return ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: filteredWishlist.length,
-                  itemBuilder: (context, index) {
-                    final wishlistItem = filteredWishlist[index];
-                    return Column(
-                      children: [
-                        WishlistProductCard(
-                          wishlistItem: wishlistItem,
-                          onBuyNow: () {
-                            print(
-                                "Buy now pressed for ${wishlistItem.product?.name}");
-                          },
-                          onDelete: () {
-                            wishlistController
-                                .removeFromWishlist(wishlistItem.wishlistId);
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                      ],
-                    );
-                  },
-                );
-              }),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // SORT Dialog
-  void _showSortDialog(
-      BuildContext context, WishlistController controller) {
-    Get.bottomSheet(
-      Container(
-        padding: const EdgeInsets.all(16),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius:
-              BorderRadius.vertical(top: Radius.circular(16)),
-        ),
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.arrow_upward),
-              title: const Text("Price: Low to High"),
-              onTap: () {
-                controller.setSortOption("asc");
-                Get.back();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.arrow_downward),
-              title: const Text("Price: High to Low"),
-              onTap: () {
-                controller.setSortOption("desc");
-                Get.back();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.cancel),
-              title: const Text("Reset"),
-              onTap: () {
-                controller.setSortOption('');
-                Get.back();
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // FILTER Dialog
-  void _showFilterDialog(
-      BuildContext context, WishlistController controller) {
-    final minPriceController =
-        TextEditingController(text: controller.minPrice.value.toString());
-    final maxPriceController = TextEditingController(
-        text: controller.maxPrice.value == double.infinity
-            ? ''
-            : controller.maxPrice.value.toString());
-
-    Get.dialog(
-      AlertDialog(
-        title: const Text("Filter by Price"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: minPriceController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: "Min Price"),
-            ),
-            TextField(
-              controller: maxPriceController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: "Max Price"),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              controller.setMinPrice(0.0);
-              controller.setMaxPrice(double.infinity);
-              Get.back();
-            },
-            child: const Text("Reset"),
           ),
-          ElevatedButton(
-            onPressed: () {
-              final min =
-                  double.tryParse(minPriceController.text) ?? 0.0;
-              final max = double.tryParse(maxPriceController.text) ??
-                  double.infinity;
-              controller.setMinPrice(min);
-              controller.setMaxPrice(max);
-              Get.back();
-            },
-            child: const Text("Apply"),
-          ),
-        ],
-      ),
+        );
+      }
+    },
+  ),
+),
+
+          
+
+            // Move All to Bag Button
+         
+          ],
+        );
+      }),
     );
   }
 }

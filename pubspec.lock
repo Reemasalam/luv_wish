@@ -57,6 +57,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.8"
+  eventify:
+    dependency: transitive
+    description:
+      name: eventify
+      sha256: b829429f08586cc2001c628e7499e3e3c2493a1d895fd73b00ecb23351aa5a66
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   fake_async:
     dependency: transitive
     description:
@@ -160,6 +168,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
+  intl:
+    dependency: "direct main"
+    description:
+      name: intl
+      sha256: "3df61194eb431efc39c4ceba583b95633a403f46c9fd341e550ce0bfa50e9aa5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.20.2"
   leak_tracker:
     dependency: transitive
     description:
@@ -192,6 +208,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.1.1"
+  lucide_icons_flutter:
+    dependency: "direct main"
+    description:
+      name: lucide_icons_flutter
+      sha256: "1fdb960db91a365e40ebe16cd4f0f856d07dde2ba6e3af16725c3b0d007593c6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.5"
   matcher:
     dependency: transitive
     description:
@@ -288,6 +312,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.8"
+  razorpay_flutter:
+    dependency: "direct main"
+    description:
+      name: razorpay_flutter
+      sha256: "7d86b2a2ba2c3a71366bbfb65664236ba4b12fd6aeaed4c13dfc5c998786b2d6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.4.0"
   shared_preferences:
     dependency: "direct main"
     description:

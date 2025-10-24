@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:luve_wish/HomeScreen/HomeScreen.dart';
 import 'package:luve_wish/LoginScreen/LoginScreen.dart';
+import 'package:luve_wish/SplashScreen/OrderScreen.dart';
 
-class OrderScreen extends StatelessWidget {
-  const OrderScreen({super.key});
+class MakePaymentScreen extends StatelessWidget {
+  const MakePaymentScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class OrderScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    '3/3',
+                    '2/3',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
@@ -44,23 +44,23 @@ class OrderScreen extends StatelessWidget {
                 ],
               ),
 
-              // Main Content
+              // Main Image + Texts
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(left: 80.0),
+                      padding: const EdgeInsets.only(left: 80),
                       child: Image.asset(
-                        'assets/balloom.png',
+                        'assets/payment.png',
                         fit: BoxFit.contain,
-                        width: 271.w,
-                        height: 261.h,
+                        width: 288.w,
+                        height: 242.h,
                       ),
                     ),
                     SizedBox(height: 60.h),
                     const Text(
-                      "Get Your Order",
+                      "Make Payment",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 24,
@@ -71,7 +71,7 @@ class OrderScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      'She believed in clean comfort so \n we delivered',
+                      'No more awkward shelves. Shop in \n confidence',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14,
@@ -89,14 +89,15 @@ class OrderScreen extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 30.0),
                 child: Column(
                   children: [
+                    // Page Dots
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        dot(isActive: false),
+                        dot(isActive: false), // 1st dot
                         const SizedBox(width: 6),
-                        dot(isActive: false),
+                        dot(isActive: true),  // 2nd dot (active)
                         const SizedBox(width: 6),
-                        dot(isActive: true),
+                        dot(isActive: false), // 3rd dot
                       ],
                     ),
                     const SizedBox(height: 24),
@@ -113,7 +114,7 @@ class OrderScreen extends StatelessWidget {
                           ),
                         ),
                         onPressed: () {
-                          showLoginBottomSheet(context);
+                          Get.to(() => const OrderScreen());
                         },
                         child: const Text(
                           "Next",
@@ -135,137 +136,16 @@ class OrderScreen extends StatelessWidget {
     );
   }
 
-  // Dot Widget
+  // Reusable dot widget
   Widget dot({required bool isActive}) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
-      width: isActive ? 14 : 8,
+      width: isActive ? 14 : 8, // Larger width for active dot
       height: 8,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(4),
         color: isActive ? Colors.black : Colors.grey.shade400,
       ),
-    );
-  }
-
-  // ✅ Bottom Sheet Function
-  void showLoginBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 24,
-            right: 24,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-            top: 24,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              
-              const SizedBox(height: 16),
-
-              const Text(
-                "Get started",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black,
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Input Field
-              TextField(
-                keyboardType: TextInputType.phone,
-                decoration: InputDecoration(
-                  hintText: "Enter mobile number",
-                  filled: true,
-                  fillColor: const Color(0xffF7F7F7),
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 25),
-
-              // Login Button
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xffC61469),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  onPressed: () {
-                    Get.offAll(() => const LoginScreen());
-                  },
-                  child: const Text(
-                    "Log In",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Privacy Note
-             Center(
-  child: Text.rich(
-    TextSpan(
-      style: const TextStyle(
-        fontSize: 13,
-        color: Colors.black,
-        fontWeight: FontWeight.w400,
-        height: 1.5, // for spacing between lines
-      ),
-      children: [
-        const TextSpan(
-          text: 'I accept that I have read & understood your\n',
-        ),
-        TextSpan(
-          text: 'Privacy Policy ',
-          style: const TextStyle(
-            decoration: TextDecoration.underline,
-            color: Colors.black,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const TextSpan(text: 'and '),
-        TextSpan(
-          text: 'T&Cs',
-          style: const TextStyle(
-            decoration: TextDecoration.underline,
-            color: Colors.black,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    ),
-    textAlign: TextAlign.center,
-  ),
-)
-
-            ],
-          ),
-        );
-      },
     );
   }
 }

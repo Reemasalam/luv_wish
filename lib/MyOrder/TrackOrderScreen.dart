@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:luve_wish/CartScreen/Views/OrderCard.dart';
+
+
 
 class TrackOrderScreen extends StatelessWidget {
   const TrackOrderScreen({super.key});
@@ -41,7 +42,7 @@ class TrackOrderScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            OrderCard(),
+            //OrderCard(),
 
             const SizedBox(height: 20),
             RichText(

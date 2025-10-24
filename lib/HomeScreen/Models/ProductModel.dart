@@ -8,6 +8,8 @@ class Product {
   final int stockCount;
   final bool isStock;
   final List<ProductImage> images;
+  final double rating; // e.g., 4.5
+  final int reviewCount; // e.g., 120
 
   Product({
     required this.id,
@@ -19,6 +21,8 @@ class Product {
     required this.stockCount,
     required this.isStock,
     required this.images,
+    required this.rating,
+    required this.reviewCount,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -31,11 +35,16 @@ class Product {
       description: json["description"] ?? "",
       stockCount: json["stockCount"] ?? 0,
       isStock: json["isStock"] ?? false,
+      rating: double.tryParse(json["rating"]?.toString() ?? "0") ?? 0,
+      reviewCount: json["reviewCount"] ?? 0,
       images: (json["images"] as List? ?? [])
           .map((e) => ProductImage.fromJson(e))
+
           .toList(),
     );
   }
+
+  toJson() {}
 }
 
 class ProductImage {

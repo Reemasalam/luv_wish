@@ -1,399 +1,187 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:luve_wish/HomeScreen/Services/HomeController.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:luve_wish/HomeScreen/Models/ProductModel.dart';
 
-import 'package:luve_wish/HomeScreen/Views/Featurecard.dart';
-import 'package:luve_wish/HomeScreen/Views/ProductCard.dart';
-import 'package:luve_wish/HomeScreen/Views/SpecialOfferCard.dart';
-import 'package:luve_wish/Src/AppButton.dart';
-import 'package:luve_wish/ProfileScreen/ProfileScreen.dart';
+import 'package:luve_wish/HomeScreen/Services/HomeController.dart';
+import 'package:luve_wish/HomeScreen/Views/Components/HomeBanner.dart';
+import 'package:luve_wish/HomeScreen/Views/Components/Homeappbar.dart';
+import 'package:luve_wish/HomeScreen/Views/Components/Homecategory.dart';
+import 'package:luve_wish/HomeScreen/Views/Components/Homesearchbar.dart';
+import 'package:luve_wish/HomeScreen/Views/Components/ProductCard.dart';
+import 'package:luve_wish/HomeScreen/Views/Components/ReviewCard.dart';
+import 'package:luve_wish/HomeScreen/Views/Components/SocialStripe.dart';
+import 'package:luve_wish/HomeScreen/Views/Components/ProductsCard.dart';
+import 'package:luve_wish/HomeScreen/Views/ProductDetailScreen.dart';
+import 'package:luve_wish/Wishlist/Service/WishlistController.dart';
 
 class HomeMainScreen extends StatelessWidget {
   HomeMainScreen({super.key});
 
   final ProductController productController = Get.put(ProductController());
+   final WishlistController wishlistController = Get.put(WishlistController());
+  String? _mainImageUrl(Product p) {
+    if (p.images.isEmpty) return null;
+    final main = p.images.firstWhere(
+      (img) => img.isMain,
+      orElse: () => p.images.first,
+    );
+    return main.url.isNotEmpty ? main.url : null;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 16.0),
-          child: CircleAvatar(
-            backgroundColor: Colors.black12,
-            radius: 18,
-            child: const Icon(Icons.menu, color: Colors.black, size: 18),
-          ),
-        ),
-        title: Text(
-          "LUVWISH",
-          style: GoogleFonts.libreCaslonText(
-            fontSize: 18,
-            color: const Color(0xffEB147D),
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        centerTitle: true,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
-                );
-              },
-              child: const CircleAvatar(
-                backgroundColor: Colors.black12,
-                radius: 18,
-                child: Icon(Icons.person, color: Colors.black, size: 18),
-              ),
-            ),
-          ),
-        ],
-      ),
-
+      appBar: const HomeAppBar(),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 🔍 Search bar
-            _buildSearchBar(),
-
-            const SizedBox(height: 20),
-
-            // ⭐ Featured Section
-            _buildFeaturedHeader(),
-            const SizedBox(height: 16),
-            const FeatureCard(),
-
-            const SizedBox(height: 20),
-
-            const SizedBox(height: 25),
-
-            // 🛒 Deal of the Day
-            _buildDealOfTheDay(),
-
-            const SizedBox(height: 24),
-
-            // 👀 Products Section
-            Text("View Products",
-                style: GoogleFonts.montserrat(
-                    fontWeight: FontWeight.w600, fontSize: 16)),
             const SizedBox(height: 12),
+            HomeSearchBar(onChanged: productController.setSearch),
+            const SizedBox(height: 20),
 
-            // ✅ Product Cards (Dynamic with GetX)
+            const HomeBanner(),
+            const SizedBox(height: 16),
+
+            const HomeCategoryStrip(),
+            const SizedBox(height: 16),
+
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Text(
+                "Discover Products",
+                style: GoogleFonts.montserrat(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF000000),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            // 🧱 Inline Product Grid (uses ProductsCard)
             Obx(() {
               if (productController.isLoading.value) {
-                return const Center(child: CircularProgressIndicator());
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 40),
+                  child: Center(child: CircularProgressIndicator()),
+                );
               }
+
               if (productController.error.value != null) {
                 return Center(child: Text(productController.error.value!));
               }
-              if (productController.filteredProducts.isEmpty) {
+
+              final products = productController.filteredProducts;
+              if (products.isEmpty) {
                 return const Center(child: Text("No products available"));
               }
 
-              return ListView.builder(
+              return GridView.builder(
+                itemCount: products.length,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: productController.filteredProducts.length,
+                padding: EdgeInsets.zero,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                 mainAxisExtent: 340, // you can tweak height if needed
+                  crossAxisSpacing: 20,
+                  mainAxisSpacing:20,
+                ),
                 itemBuilder: (context, index) {
-                  final product = productController.filteredProducts[index];
-
-                  return ProductCard(
+                  final product = products[index];
+                  return ProductsCard(
                     product: product,
-                    onAddToWish: () {
-                      Get.snackbar("Wishlist", "${product.name} added to wishlist!");
-                    },
+                    showCategory: true,
+                    isHorizontal: false,
                   );
                 },
               );
             }),
 
-            const SizedBox(height: 20),
-
-            // 🔥 Trending
-            _buildTrending(),
-
             const SizedBox(height: 24),
 
-            // 🎁 Special Offers
-            const SpecialOfferCard(),
-
-            const SizedBox(height: 20),
-
-            // 🛍️ Buy Now Button
-            Center(
-              child: AppButton(
-                text: "Buy Now",
-                onPressed: () {
-                  // Add your onTap logic here
-                },
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Text(
+                "All in One Periods Solution",
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF000000),
+                ),
               ),
             ),
+
+            const SizedBox(height: 8),
+               Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: SizedBox(
+                height: 110.h,
+                child: Obx(() {
+                  final products = productController.products;
+                  if (products.isEmpty) {
+                    return const Center(child: Text("No products found"));
+                  }
+                  return ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: products.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    itemBuilder: (context, index) {
+                      final product = products[index];
+                      final imageUrl = _mainImageUrl(product) ?? '';
+                      final discountPercent = product.actualPrice > 0
+                          ? ((product.actualPrice - product.discountedPrice) /
+                                  product.actualPrice *
+                                  100)
+                              .round()
+                          : 0;
+
+                      return SizedBox(
+                        width: 332.w,
+                        child: ProductCardSym(
+                          imageUrl: imageUrl,
+                          title: product.name,
+                          price: product.discountedPrice,
+                          mrp: product.actualPrice,
+                          discountPercent: discountPercent,
+                          onTap: () => Get.to(
+                            () => ProductDetailScreen(product: product),
+                          ),
+                          onMoveToBag: () {},
+                        ),
+                      );
+                    },
+                  );
+                }),
+              ),
+            ),
+           
             const SizedBox(height: 20),
+
+            const HomeReviewCard(),
+            const SizedBox(height: 16),
+
+            Text(
+              "Some Real Story from Social Media",
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF000000),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+            const HomeSocialStrip(),
+            const SizedBox(height: 28),
           ],
         ),
       ),
     );
   }
-
-  // --- Search Bar ---
-  Widget _buildSearchBar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF9F9F9),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: TextField(
-        onChanged: (value) => productController.setSearch(value),
-        style: const TextStyle(color: Color(0xFF000000), fontSize: 14),
-        decoration: const InputDecoration(
-          hintText: 'Search any Product...',
-          hintStyle: TextStyle(color: Color(0xFFBBBBBB), fontSize: 15),
-          border: InputBorder.none,
-          isDense: true,
-          contentPadding: EdgeInsets.symmetric(vertical: 12),
-          icon: Icon(Icons.search, color: Color(0xFFBBBBBB)),
-          suffixIcon: Icon(Icons.mic_none_outlined, color: Color(0xFFBBBBBB)),
-        ),
-      ),
-    );
-  }
-
-  // --- Featured Header with Sort & Filter ---
-  Widget _buildFeaturedHeader() => Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text("All Featured",
-              style: GoogleFonts.montserrat(
-                  fontSize: 18, fontWeight: FontWeight.w600)),
-          Row(
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  Get.bottomSheet(
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        borderRadius:
-                            BorderRadius.vertical(top: Radius.circular(16)),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text("Sort by Price",
-                              style: GoogleFonts.montserrat(
-                                  fontSize: 16, fontWeight: FontWeight.w600)),
-                          const SizedBox(height: 10),
-                          ListTile(
-                            title: const Text("Low to High"),
-                            onTap: () {
-                              productController.setSort("asc");
-                              Get.back();
-                            },
-                          ),
-                          ListTile(
-                            title: const Text("High to Low"),
-                            onTap: () {
-                              productController.setSort("desc");
-                              Get.back();
-                            },
-                          ),
-                          ListTile(
-                            title: const Text("Clear Sort"),
-                            onTap: () {
-                              productController.setSort("");
-                              Get.back();
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.black,
-                  backgroundColor: const Color(0xFFFAF9F9),
-                  elevation: 0,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: const Text("Sort"),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton.icon(
-                onPressed: () {
-                  Get.bottomSheet(
-                    StatefulBuilder(
-                      builder: (context, setState) {
-                        RangeValues range =
-                            productController.priceRange.value ??
-                                const RangeValues(0, 1000);
-                        return Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.vertical(
-                                top: Radius.circular(16)),
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text("Filter by Price",
-                                  style: GoogleFonts.montserrat(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600)),
-                              const SizedBox(height: 20),
-                              RangeSlider(
-                                values: range,
-                                min: 0,
-                                max: 5000,
-                                divisions: 100,
-                                labels: RangeLabels(
-                                    "₹${range.start.round()}",
-                                    "₹${range.end.round()}"),
-                                onChanged: (val) {
-                                  setState(() => range = val);
-                                },
-                                onChangeEnd: (val) {
-                                  productController.setPriceFilter(val);
-                                },
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  productController.priceRange.value = null;
-                                  productController.applyFilters();
-                                  Get.back();
-                                },
-                                child: const Text("Reset"),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.black,
-                  backgroundColor: const Color(0xFFFAF9F9),
-                  elevation: 0,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                icon: const Icon(Icons.tune, size: 16),
-                label: const Text("Filter"),
-              ),
-            ],
-          )
-        ],
-      );
-
-  Widget _buildDealOfTheDay() => Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xff4392F9),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text("Deal of the Day",
-                  style: GoogleFonts.montserrat(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      color: Colors.white)),
-              const SizedBox(height: 4),
-              Row(children: [
-                const Icon(Icons.access_time, size: 14, color: Colors.white),
-                const SizedBox(width: 4),
-                Text("22h 55m 20s remaining",
-                    style: GoogleFonts.poppins(
-                        fontSize: 12, color: Colors.white)),
-              ]),
-            ]),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: Colors.white, width: 2),
-              ),
-              child: Row(children: [
-                Text("View all",
-                    style: GoogleFonts.montserrat(
-                        fontSize: 12,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500)),
-                const SizedBox(width: 4),
-                const Icon(Icons.arrow_forward,
-                    size: 14, color: Colors.white),
-              ]),
-            ),
-          ],
-        ),
-      );
-
-  Widget _buildTrending() => Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xffEB147D),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text("Trending Products",
-                  style: GoogleFonts.montserrat(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                      color: Colors.white)),
-              const SizedBox(height: 10),
-              Row(children: [
-                const Icon(Icons.calendar_today,
-                    size: 14, color: Colors.white),
-                const SizedBox(width: 8),
-                Text("Late Date 29/02/22",
-                    style: GoogleFonts.poppins(
-                        fontSize: 14, color: Colors.white)),
-              ]),
-            ]),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: Colors.white, width: 2),
-              ),
-              child: Row(children: [
-                Text("View all",
-                    style: GoogleFonts.montserrat(
-                        fontSize: 12,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500)),
-                const SizedBox(width: 4),
-                const Icon(Icons.arrow_forward,
-                    size: 14, color: Colors.white),
-              ]),
-            ),
-          ],
-        ),
-      );
 }

@@ -8,7 +8,9 @@ plugins {
 android {
     namespace = "com.example.luve_wish"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+
+    // 🔧 Use the latest required NDK version
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -20,10 +22,7 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.luve_wish"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -32,8 +31,24 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // ✅ Disable minification to avoid Razorpay R8 crash
+            isMinifyEnabled = false
+            isShrinkResources = false
+
+            // If you later want to enable minify again, make sure to add keep rules in proguard-rules.pro
+
+            // ✅ Use your release signing config when ready (right now using debug for testing)
+            signingConfig = signingConfigs.getByName("debug")
+
+            // ✅ Still include ProGuard rules for safety
+            proguardFiles(
+                getDefaultProguardFile("proguard-android.txt"),
+                "proguard-rules.pro"
+            )
+        }
+
+        debug {
+            // Keep normal debug config
             signingConfig = signingConfigs.getByName("debug")
         }
     }
